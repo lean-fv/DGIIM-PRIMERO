@@ -1,0 +1,8 @@
+  1  1  4El proceso de Compilacion                 13
+  1  0  0Introduccion a la Programacion             1
+  1  1  0El ordenador, algoritmos y programas       2
+  1  1  1El Ordenador: Conceptos Basicos            2
+  1  1  2Datos y algoritmos                         3
+  1  1  3Lenguajes de programacion                  6
+  1  1  4El proceso de Compilacion                 13
+  1  2  0Especificacion de programas               14

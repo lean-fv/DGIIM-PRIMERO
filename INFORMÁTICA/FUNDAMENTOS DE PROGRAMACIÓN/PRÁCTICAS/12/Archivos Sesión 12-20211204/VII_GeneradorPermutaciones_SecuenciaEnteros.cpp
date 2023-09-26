@@ -1,0 +1,580 @@
+/***************************************************************************/
+// FUNDAMENTOS DE PROGRAMACIÓN
+//
+// (C) FRANCISCO JOSÉ CORTIJO BON
+// DEPARTAMENTO DE CIENCIAS DE LA COMPUTACIÓN E INTELIGENCIA ARTIFICIAL
+//
+// RELACIÓN DE PROBLEMAS 7
+//
+/*
+	Este programa continua trabajando con permutaciones de enteros: 
+	colecciones de enteros sin elementos repetidos que coniene TODOS 
+	los números entre el mínimo y el máximo de dichos valores.
+
+	Este programa es similar al presentado en la solución al ejercicio 6 
+	salvo que la clase "Permutacion" usa un objeto "SecuenciaEnteros" para 
+	almacenar los elementos de la permutación en lugar de un vector clásico.
+*/
+/***************************************************************************/
+
+#include <iostream>
+#include <iomanip>
+
+#include <random>  // para la generación de números pseudoaleatorios
+#include <chrono>  // para la semilla
+
+using namespace std;
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+class GeneradorAleatorioEnteros
+{  
+private:
+	
+   mt19937 generador_mersenne;    // Mersenne twister
+   uniform_int_distribution<int>  distribucion_uniforme;
+   
+   /************************************************************************/
+   long long Nanosec(){
+      return (chrono::high_resolution_clock::now().
+              time_since_epoch().count());
+   }
+   /************************************************************************/ 
+
+public:
+	
+   /************************************************************************/	
+   GeneradorAleatorioEnteros()
+      :GeneradorAleatorioEnteros(0, 1){
+   }
+   
+   /************************************************************************/  
+   GeneradorAleatorioEnteros(int min, int max) {
+      const int A_DESCARTAR = 70000;
+      // ACM TOMS Volume 32 Issue 1, March 2006
+      
+      auto semilla = Nanosec();
+      generador_mersenne.seed(semilla);
+      generador_mersenne.discard(A_DESCARTAR);
+      distribucion_uniforme = uniform_int_distribution<int> (min, max);
+   }
+   
+   /************************************************************************/
+   int Siguiente(){
+      return (distribucion_uniforme(generador_mersenne));
+   }
+   /************************************************************************/
+};
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+class SecuenciaEnteros 
+{
+
+private:
+
+	static const int TAMANIO = 50; // Número de casillas disponibles
+	int vector_privado[TAMANIO];
+	
+	//PRE: 0 <= total_utilizados <= TAMANIO
+	int total_utilizados;	// Número de casillas ocupadas
+
+
+public:
+	
+	/***********************************************************************/
+	// Constructor sin argumentos
+
+	SecuenciaEnteros (void) 
+	{
+		total_utilizados = 0;
+	}
+
+	/***********************************************************************/
+	// Métodos de lectura (Get) de los datos individuales 
+
+	// Devuelve el número de casillas ocupadas
+	int TotalUtilizados (void)
+	{
+		return (total_utilizados);
+	}
+
+	// Devuelve el número de casillas disponibles
+	int Capacidad (void)
+	{
+		return (TAMANIO);
+	}
+
+	/***********************************************************************/
+	// Añade un elemento al vector.
+	// Recibe: nuevo, el elemento que se va a añadir.
+	//
+	// PRE: total_utilizados < TAMANIO
+	// 		La adición se realiza si hay espacio para el nuevo elemento. 
+	// 		El nuevo elemento se coloca al final del vector. 
+	// 		Si no hay espacio, no se hace nada.	
+
+	void Aniade (int nuevo)
+	{
+		if (total_utilizados < TAMANIO) {
+			vector_privado[total_utilizados] = nuevo;
+			total_utilizados++;
+		}
+	}
+
+	/***********************************************************************/
+	// Devuelve el elemento de la casilla "indice" 
+	//
+	// PRE: 0 <= indice < total_utilizados 
+
+	int Elemento (int indice)
+	{
+		return vector_privado[indice];
+	}
+
+	/***********************************************************************/
+	// Sustituye la componente situada en la posición "indice_componente" 
+	// por el valor "nuevo".
+	//
+	// PRE: 0 <= indice < total_utilizados 
+	// 		La modificación se realiza si "indice_componente" es correcto. 
+	// 		Si no es así, no se hace nada.	
+	
+	void Modifica (int indice_componente, int nuevo)
+	{
+		if ((indice_componente>=0)  &&  (indice_componente<total_utilizados))
+
+			vector_privado[indice_componente] = nuevo;
+	}
+	
+	/***********************************************************************/
+	// Devuelve la posición del mínimo valor de la secuencia
+	//
+	// PRE: total_utilizados > 0
+	
+	int PosicionMinimo (void)
+	{
+		int posicion_minimo;
+		int minimo;
+	
+		minimo = vector_privado[0];
+		posicion_minimo = 0;
+		
+		for (int i = 1; i < total_utilizados ; i++) { 
+			
+			if (vector_privado[i] < minimo){
+				minimo = vector_privado[i];
+				posicion_minimo = i;
+			}
+		}
+		
+		return (posicion_minimo);		
+	}
+	
+	/***********************************************************************/
+	// Devuelve la posición del máximo valor de la secuencia
+	//
+	// PRE: total_utilizados > 0
+	
+	int PosicionMaximo (void)
+	{
+		int posicion_maximo;
+		int maximo;
+	
+		maximo = vector_privado[0];
+		posicion_maximo = 0;
+		
+		for (int i = 1; i < total_utilizados ; i++) { 
+			
+			if (vector_privado[i] > maximo){
+				maximo = vector_privado[i];
+				posicion_maximo = i;
+			}
+		}
+		
+		return (posicion_maximo);		
+	}
+	
+	/***********************************************************************/
+	// Comprueba si la secuencia es una permutación correcta. 
+	//
+	// PRE: total_utilizados > 0
+	
+	bool EsPermutacion (void)
+	{
+		// Calcular el mínimo y el máximo valor de la secuencia
+		int minimo = Elemento(PosicionMinimo());
+		int maximo = Elemento(PosicionMaximo());
+
+		/* 	
+			Si el número de elementos de la secuencia (total_utilizados) no 
+			es exactamente "maximo"-"minimo"+"1", faltan valores o hay valores
+			repetidos. En este caso ya descartamos que sea una permutacion sin 
+			necesidad de hacer más comprobaciones.
+		*/
+		
+		bool es_permutacion;
+
+		if (total_utilizados != maximo-minimo+1) 
+			es_permutacion = false; 
+		else 
+			es_permutacion = true; 
+
+		/*
+			Comprobar si están todos los valores comprendidos entre "minimo" 
+			y "maximo". Se termina si no se encuentra alguno (en ese caso 
+			la secuencia no es una permutación). Si se encuentran todos los 
+			valores entonces la secuencia forma una permutación. 
+		*/
+		
+		// Sabemos que "minimo" y "maximo" están en la secuencia, 
+		// evidentemente. La comprobación se hará entonces desde el siguiente 
+		// al mínimo y hasta el anterior al máximo. 
+		
+		int valor_buscado = minimo+1; 
+
+		while ((es_permutacion) && (valor_buscado < maximo)) {
+			
+			bool encontrado = false;
+			int pos = 0; 
+
+			while ((!encontrado) && (pos < total_utilizados)) {
+
+				if (vector_privado[pos] == valor_buscado) 
+					encontrado = true; // Ya no es preciso seguir buscando
+				else 
+					pos++;	// Continuar con la ssiguiente casilla
+
+			} //while ((!encontrado) && (pos < total_utilizados))
+
+			if (!encontrado) // El valor buscado no está
+				es_permutacion = false;  
+			else 			
+				valor_buscado++; // Para comprobar el siguiente
+
+		} // while ((es_permutacion) && (valor_buscado <= maximo) 
+
+		return (es_permutacion);
+	}
+	/***********************************************************************/
+};
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// La clase Permutacion representa una permutación de enteros, es decir, el 
+// conjunto de todos los enteros entre un mínimo y un máximo sin repetidos 
+// y no necesariamente ordenado.
+	
+class Permutacion
+{
+
+private:
+
+	// La permutación se almacena en una secuencia de enteros
+	
+	SecuenciaEnteros permutacion_privada; 
+	
+public: 
+
+	/***********************************************************************/
+	// Constructor con argumentos
+	// Recibe: una_permutacion, un dato de tipo "SecuenciaEnteros". 
+	//
+	// PRE: Supondremos que "una_permutacion" es una permutación correcta. 
+	//		Existe un método de la clase "SeuenciaEnteros" que permite 
+	//		comprobar que se cumple esta precondición. 
+	
+	Permutacion (SecuenciaEnteros una_permutacion) 
+	{
+		permutacion_privada = una_permutacion;
+		
+		// Asignación válida porque los dos objetos son de la misma clase.
+	}
+
+	/***********************************************************************/
+	// Devuelve el número de elementos de la permutación. 
+
+	int NumElementos(void)
+	{
+		return (permutacion_privada.TotalUtilizados());
+	}
+
+	/***********************************************************************/
+	// Devuelve la posición del mínimo de la permutación. 
+	// PRE: total_utilizados > 0 
+
+	int PosMinimo (void)
+	{
+		return (permutacion_privada.PosicionMinimo());
+	}
+
+	/***********************************************************************/
+	// Devuelve el mínimo de la permutación. 
+	// PRE: total_utilizados > 0 
+
+	int Minimo (void)
+	{
+		return (permutacion_privada.Elemento(PosMinimo()));
+	}
+
+	/***********************************************************************/
+	// Devuelve la posición del máximo de la permutación. 
+	// PRE: total_utilizados > 0 
+
+	int PosMaximo (void)
+	{
+		return (permutacion_privada.PosicionMaximo());
+	}
+
+	/***********************************************************************/
+	// Devuelve el máximo de la permutación. 
+	// PRE: al menos hay un elemento 
+
+	int Maximo(void)
+	{
+		return (permutacion_privada.Elemento(PosMaximo()));
+	}
+
+	/***********************************************************************/
+	// Devuelve el elemento de la casilla "indice" 
+	// PRE: la posición dada por "indice" es correcta.
+
+	int Elemento(int indice)
+	{
+		return (permutacion_privada.Elemento(indice));
+	}
+
+	/***********************************************************************/
+	// Calcula el número de lecturas de la permutación
+
+	int NumeroLecturas (void)
+	{	
+		int num_elementos = NumElementos();
+		int contador_lecturas = 1; 
+		int pos = 0; 
+
+		// Usaremos un ciclo for porque sabemos exactamente los números 
+		// que deben buscarse: Minimo(), Minimo()+1,Minimo()+2,...,Maximo()
+
+		for (int n=Minimo(); n<=Maximo(); n++) {
+
+			bool encontrado = false;
+
+			while (!encontrado) {
+
+				if (Elemento(pos) == n) 
+					encontrado = true; 
+
+				else {
+					if (pos==num_elementos-1)	// se ha examinado el último->
+						contador_lecturas++;	// empieza otra lectura.
+
+					pos = (pos+1)%num_elementos; // Incremento de "pos"
+
+					// CLAVE: La operación "% num_elementos" permite que el 
+					// siguiente al último (posición = "num_elementos"-1) 
+					// sea el primero (posición = 0)			
+				}
+
+			} //while (!encontrado)
+
+		} // for (int n=Minimo(); n<=Maximo(); n++) 
+
+		return (contador_lecturas); 
+	}
+	
+	/***********************************************************************/
+};
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// Los objetos de esta clase generan permutaciones aleatorias (mediante el 
+// método "Genera") entre dos valores dados.  
+
+class GeneradorPermutacionesAleatorias 
+{
+
+public: 
+
+	/***********************************************************************/
+
+	Permutacion Genera (int primero, int ultimo)
+	{
+        /*
+		Algoritmo:
+
+		* Ir generando aleatoriamente enteros entre "primero" y "ultimo". 
+		* Añadir a "permutados" el entero generado, siempre y cuando 
+		  no se haya añadido anteriormente.
+
+		El generador puede generar el mismo número varias veces, por lo que 
+		necesitamos llevar la cuenta de cuáles son los que ya se han generado.
+		
+			P.e., si primero = 3 y ultimo = 5, necesitaremos el vector:
+				ya_generado = {false, false, false}
+			Cuando genere el 5:
+				ya_generado = {false, false, true}
+
+			Termino cuando haya generado todos los enteros entre 3 y 5.
+            
+		En vez de recorrer cada vez que se genera un entero completamente 
+		el vector "ya_generado" en busca de algún false (indica algún hueco), 
+		basta con contar cuántos enteros distintos llevo generados en cada 
+		momento --> total_generados_distintos
+
+            Si, por ejemplo, el primer entero generado es el 4, nos queda:
+            permutados = {4, ? , ?}
+        */
+        
+        // Número de valores a generar 
+		int totales_a_generar = ultimo - primero + 1;
+		
+		
+		static const int TAMANIO = 50; 	// Número de casillas disponibles
+		bool ya_generado[TAMANIO];	 	// Vector auxiliar de control  	
+		
+		// Iniciar el vector de control a false (no se ha registrado 
+		// ningún valor de la permutación)
+
+		for (int i = 0; i < totales_a_generar; i++)
+			ya_generado[i] = false;
+
+
+		// El objeto "permutados" contendrá el resultado (permutación)
+		SecuenciaEnteros permutados; 
+		
+	
+		// Iniciar generador aleatorio 
+		GeneradorAleatorioEnteros aleatorio (primero, ultimo); 
+		
+		
+		int total_generados_distintos = 0;  
+	
+		while (total_generados_distintos < totales_a_generar) {
+
+			// Obtener un nuevo valor aleatorio entre "primero" y "ultimo"
+			int generado = aleatorio.Siguiente(); 
+			
+			int indice_generado = generado - primero;
+			// El índice de "primero" es 0, el de "primero"+1 es 1, ...
+			// Sirve para consultar el vector de control
+
+			// Si no ha sido generado, añadirlo al vector resultado 
+			// Si ha sido generado, no hacer nada: en la siguiente iteración 
+			// se generará otro valor aleatorio.
+
+			if (!ya_generado[indice_generado]) {
+
+				total_generados_distintos++;
+				
+				ya_generado[indice_generado] = true;
+				
+				permutados.Aniade(generado);
+			}
+
+		} // while (total_generados_distintos < totales_a_generar)
+      
+      
+		// Crear la permutación con la secuencia de enteros y devolverla
+
+		Permutacion permutacion (permutados);
+		
+		return (permutacion);
+   }
+	/***********************************************************************/
+};
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+/***************************************************************************/
+/***************************************************************************/
+
+int main (void)
+{
+	const int MAX_LINE = 10; // Mostrar MAX_LINE números por línea 
+
+	// Pedir los valores extremos de la permutación
+
+	int minimo, maximo; 
+
+	cout << "Introduzca los dos valores extremos de la permutación: ";
+	cin >> minimo >> maximo; 
+
+	if (maximo < minimo) {
+		int tmp = maximo; 
+		maximo = minimo; 
+		minimo = tmp;
+	}
+
+	// Crear el objeto generador de permutaciones 
+    GeneradorPermutacionesAleatorias gen_permutaciones;
+
+
+	bool sigo = true; 
+
+	while (sigo) {
+
+		// Observar cómo actúa el constructor de copia de la clase Permutacion
+		Permutacion permutacion(gen_permutaciones.Genera(minimo,maximo));
+
+
+		// Consultar cuántos elementos tiene la permutación
+
+		int tope = permutacion.NumElementos();
+	
+		cout << "La permutación tiene " << tope << " elementos." << endl;
+		cout << "Rango: " << permutacion.Minimo() 
+			 << " - " << permutacion.Maximo() << endl;
+		cout << endl;
+
+		// Mostrar los elementos de la permutación
+
+		for (int i=0; i<tope; i++) {
+
+			char separador;
+
+			if ((i+1)%MAX_LINE == 0) 
+				separador = '\n';
+			else 
+				separador = ' ';
+			cout << setw(4) << permutacion.Elemento(i) << separador;
+		}
+		cout << endl << endl;
+		
+		// Calcular el número de lecturas 
+	
+		cout << "La permutación tiene " << permutacion.NumeroLecturas() 
+			 << " lecturas." << endl;
+		cout << endl << endl;
+		
+			
+		// Pedir otra permutación
+
+		char respuesta;
+		cout << "¿Generar otra permutación (s)? ";
+		cin >> respuesta; 
+
+		if (toupper(respuesta)!='S') 
+			sigo = false; 
+	}
+
+    cout << endl << endl;
+
+	return 0;
+}
+
+/***************************************************************************/
+/***************************************************************************/
+

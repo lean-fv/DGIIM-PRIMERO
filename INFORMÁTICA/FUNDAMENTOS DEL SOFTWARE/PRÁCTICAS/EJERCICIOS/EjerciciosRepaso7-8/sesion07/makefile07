@@ -1,0 +1,33 @@
+# Nombre archivo: makefile07
+# Uso: make –f makefile07 [clean]
+# Fecha:	25/05/2022 
+# Autor:	Leandro Jorge Fernández Vega 
+# Versión:	1.0 
+# Descripción: Mantiene todas las dependencias entre los módulos y la biblioteca que utiliza el programa2.
+
+
+CC= g++		#Compilador.
+I_DIR= ./includes	#Directorio donde se encuentran los archivos .h.
+L_DIR= ./libs		#Directorio donde se encuentran las bibliotecas.
+
+Practica7: main2.o factorial.o hello.o ./libs/libmath.a
+	$(CC) -L$(L_DIR) -o $@ $^
+
+main2.o: main2.cpp
+	$(CC) -I$(I_DIR) -c $<
+	
+factorial.o: factorial.cpp
+	$(CC) -I$(I_DIR) -c $<
+
+hello.o: hello.cpp
+	$(CC) -I$(I_DIR) -c $<
+	
+	
+./libs/libmath.a: sin.o cos.o tan.o
+	ar -rsv $@ $^
+	
+sin.o cos.o tan.o: sin.cpp cos.cpp tan.cpp
+	$(CC) -I$(I_DIR) -c $^
+	
+clean:
+	rm *.o Practica7

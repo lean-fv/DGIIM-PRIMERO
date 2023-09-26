@@ -1,0 +1,17 @@
+1.- Situado en /$ creamos árbol de directorios.
+
+mkdir mnt home
+cd home
+mkdir luis pedro
+cd luis
+touch Carta.txt
+
+2.- Situado en /home: borrar Carta.txt
+
+cd home
+rm ~/home/luis/Carta.txt
+
+3.- Situado en Luis, listamos archivos que comienzan por C y su extensión termina en x.
+
+cd luis
+ls C*.*x

@@ -1,0 +1,33 @@
+#Variable que almacena la ubicación de las bibliotecas.
+LIB = ./libs
+#Variable que almacena la ubicación de los includes. 
+INCLUDE_DIR = ./includes
+#Variable que almacena el compilador.
+CC = g++
+#Variable que almacena los objetos. 
+OBJS = main2.o factorial.o hello.o $(LIB)/libmath.a	
+
+Programa7: $(OBJS)   
+	$(CC) -L$(LIB) -o $@ $^
+	
+main2.o: main2.cpp 
+	$(CC) -I$(INCLUDE_DIR) -c $<
+	
+factorial.o: factorial.cpp 
+	$(CC) -I$(INCLUDE_DIR) -c $<
+	
+hello.o: hello.cpp 
+	$(CC) -I$(INCLUDE_DIR) -c $<
+	
+$(LIB)/libmath.a: tan.o sin.o cos.o
+	ar -rsv $@ $^
+	
+tan.o: tan.cpp 
+	$(CC) -I$(INCLUDE_DIR) -c $<
+	
+sin.o: sin.cpp 
+	$(CC) -I$(INCLUDE_DIR) -c $<
+	
+cos.o: cos.cpp
+	$(CC) -I$(INCLUDE_DIR) -c $<
+	

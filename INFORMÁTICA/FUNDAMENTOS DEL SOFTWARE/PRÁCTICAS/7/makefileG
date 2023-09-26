@@ -1,0 +1,38 @@
+# Nombre archivo: makefileG
+# Uso: make –f makefileG [clean]
+# Fecha:	23/05/2022 
+# Autor:	Leandro Jorge Fernández Vega 
+# Versión:	1.0 
+# Descripción: Mantiene todas las dependencias entre los módulos y la biblioteca que utiliza el programa2.
+ 
+
+# Variable que indica el compilador que se va a utilizar
+CC=g++
+
+# Variable que indica el directorio en donde se encuentran los archivos de cabecera
+INCLUDE_DIR= ./includes
+
+# Variable que indica el directorio en donde se encuentran las bibliotecas
+LIB_DIR= ./libs
+
+# Ejecucion principal
+
+programa2: main2.o factorial.o hello.o $(LIB_DIR)/libmates.a
+	$(CC) -L$(LIB_DIR) -o $@ $^
+main2.o: main2.cpp
+	$(CC) -I$(INCLUDE_DIR) -c $<
+factorial.o: factorial.cpp
+	$(CC) -I$(INCLUDE_DIR) -c $<
+hello.o: hello.cpp
+	$(CC) -I$(INCLUDE_DIR) -c $<
+libmates.a: sin.o cos.o tan.o
+	ar -rvs $(LIB_DIR)/libmates.a $^
+sin.o: sin.cpp
+	$(CC) -I$(INCLUDE_DIR) -c $<
+cos.o: cos.cpp
+	$(CC) -I$(INCLUDE_DIR) -c $<
+tan.o: tan.cpp
+	$(CC) -I$(INCLUDE_DIR) -c $<
+	
+clean:
+	rm *.o programa2

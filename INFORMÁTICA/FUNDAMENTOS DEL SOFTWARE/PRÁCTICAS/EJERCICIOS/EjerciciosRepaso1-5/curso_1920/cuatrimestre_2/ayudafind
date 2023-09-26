@@ -1,0 +1,20 @@
+       enclose the pattern in quotes or escape the wildcard, thus allowing find to use the pattern with the wildcard during the search for file name matching  instead  of
+       file names expanded by the parent shell:
+       $ find . -name '*.c' -print
+       $ find . -name \*.c -print
+
+COPYRIGHT
+       Copyright © 1990-2019 Free Software Foundation, Inc.  License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+       This is free software: you are free to change and redistribute it.  There is NO WARRANTY, to the extent permitted by law.
+
+BUGS
+       There  are  security problems inherent in the behaviour that the POSIX standard specifies for find, which therefore cannot be fixed.  For example, the -exec action
+       is inherently insecure, and -execdir should be used instead.  Please see Finding Files for more information.
+
+       The environment variable LC_COLLATE has no effect on the -ok action.
+
+       The best way to report a bug is to use the form at https://savannah.gnu.org/bugs/?group=findutils.  The reason for this is that you will  then  be  able  to  track
+       progress  in  fixing  the problem.  Other comments about find(1) and about the findutils package in general can be sent to the bug-findutils mailing list.  To join
+       the list, send email to bug-findutils-request@gnu.org.
+
+                                                                                                                                                                   FIND(1)
